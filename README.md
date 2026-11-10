@@ -52,73 +52,37 @@ The desktop window is one flat panel, so both of your eyes see the same image. F
 
 ## Install
 
-YouTube needs a JavaScript runtime. Deno is preferred. Node 22 or newer also works. yt-dlp is installed with its default extras, including the EJS challenge scripts. If `deno` is on `PATH`, it is used automatically. Node is enabled as well when it is installed.
-
-### For your user
-
-This installs Frame Player into `~/.local/opt/frameplayer`, adds a desktop entry, and puts `frameplayer` and `frameplayer-uninstall` on `~/.local/bin`. The script creates `~/.local/opt` when `~/.local` exists but `opt` does not.
+From this repository:
 
 ```sh
-./scripts/install.sh
-frameplayer
+sh install.sh
 ```
 
-### Flatpak (preferred on SteamOS)
-
-SteamOS does not let you write the root filesystem. Flatpak installs into your user. The build script installs the aarch64 runtime on Steam Frame (or x86_64 on a PC), builds the app, and only then is `flatpak run` valid. It also installs `frameplayer-uninstall` into `~/.local/bin`.
-
-`cd` into the checkout first. The directory that contains `scripts/` is the right place. `./scripts/build-flatpak.sh` can fail in `ash` with "No such file or directory" when `/bin/sh` is not the interpreter, so call `sh` yourself:
+On SteamOS that builds a Flatpak. The first run downloads a runtime, so it takes a while. Then:
 
 ```sh
-cd /path/to/frameplayer
-sh scripts/build-flatpak.sh
 flatpak run app.frameplayer.Player
 ```
 
-`flatpak run` before that build finishes exits with `app/app.frameplayer.Player/aarch64/master not installed`. That means the Flatpak is not on the headset yet, not that the arch is wrong.
+`flatpak run` before `sh install.sh` finishes says the app is not installed. That is expected.
 
-The manifest builds mpv 0.42 with libmpv, installs Deno 2.9.8 (YouTube), and installs the Python app. It is not pinned to one CPU architecture: build it on the Frame for aarch64, or on a PC for x86_64. The sandbox asks for `--device=all` because the Iris node is `/dev/video-dec0` and Steam Input is `/dev/input/js*`. `--device=dri` alone does not expose either.
+On a PC that has no `flatpak` command, the same `sh install.sh` creates `~/.local/opt` and installs there. Start it with `~/.local/bin/frameplayer`.
 
-Confirm the bundled FFmpeg can see the V4L2 decoders:
+YouTube playback needs Deno, or Node 22 or newer, on `PATH`.
 
-```sh
-flatpak run --command=ffmpeg app.frameplayer.Player -hide_banner -decoders | grep v4l2m2m
-```
-
-You want `h264_v4l2m2m`, `hevc_v4l2m2m`, and `vp9_v4l2m2m`.
-
-### Checkout, for development
+Remove the app with:
 
 ```sh
-python3 -m venv .venv
-.venv/bin/pip install -e .
-.venv/bin/frameplayer
+sh uninstall.sh
 ```
 
-### Uninstall
-
-Install leaves `frameplayer-uninstall` next to `frameplayer`. Run that when you want the app gone:
-
-```sh
-frameplayer-uninstall
-```
-
-The same script is `./scripts/uninstall.sh` in a checkout. It removes the user install (`~/.local/opt/frameplayer`), the desktop entry, the icon, and the Flatpak `app.frameplayer.Player` if that is installed. Favorites, history, and settings stay. Delete those too with:
-
-```sh
-frameplayer-uninstall --purge
-```
-
-A system-wide Flatpak that this user cannot remove prints the `sudo flatpak uninstall` command instead of failing the rest of the cleanup. A non-Steam shortcut added inside Steam is removed from the Steam library by hand.
+`sh uninstall.sh --purge` also deletes favorites and settings. A Steam non-Steam shortcut is removed in the Steam library.
 
 ## Add it to Steam
 
-1. Install the Flatpak (or the local checkout).
+1. Run `sh install.sh`.
 2. In Steam: **Games → Add a Non-Steam Game to My Library → Browse**.
-3. Pick the executable:
-   - user install: `~/.local/bin/frameplayer`
-   - Flatpak user install: `~/.local/share/flatpak/exports/bin/app.frameplayer.Player`
-   - Flatpak system install: `/var/lib/flatpak/exports/bin/app.frameplayer.Player`
+3. Pick `~/.local/share/flatpak/exports/bin/app.frameplayer.Player`, or `~/.local/bin/frameplayer` if you installed without Flatpak.
 4. In **Properties**, name it Frame Player. Enable Steam Input and use a gamepad template.
 5. Launch it from the library. On Steam Frame it opens as a flat window in the dashboard, the same way other desktop apps do. From Desktop mode, the controller aims a laser at the buttons; face buttons and sticks still work as below.
 
