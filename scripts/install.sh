@@ -21,11 +21,15 @@ case "$PREFIX" in
     ;;
 esac
 
+# python3 -m venv does not create missing parents. A fresh account often has no ~/.local.
+mkdir -p "$(dirname "$PREFIX")" "$BIN_DIR" \
+  "$HOME/.local/share/applications" \
+  "$HOME/.local/share/icons/hicolor/scalable/apps"
+
 python3 -m venv "$PREFIX"
 "$PREFIX/bin/pip" install --upgrade pip
 "$PREFIX/bin/pip" install "$root"
 
-mkdir -p "$BIN_DIR"
 cat > "$BIN_DIR/frameplayer" << EOF
 #!/bin/sh
 # frameplayer-user-install
@@ -37,8 +41,6 @@ chmod 755 "$BIN_DIR/frameplayer"
 cp "$root/scripts/uninstall.sh" "$BIN_DIR/frameplayer-uninstall"
 chmod 755 "$BIN_DIR/frameplayer-uninstall"
 
-mkdir -p "$HOME/.local/share/applications"
-mkdir -p "$HOME/.local/share/icons/hicolor/scalable/apps"
 cp "$root/frameplayer/assets/frameplayer.svg" \
   "$HOME/.local/share/icons/hicolor/scalable/apps/$APP_ID.svg"
 cat > "$HOME/.local/share/applications/$APP_ID.desktop" << EOF
