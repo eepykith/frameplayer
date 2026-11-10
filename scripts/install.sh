@@ -9,6 +9,10 @@
 set -eu
 
 root=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)
+if [ -z "${HOME:-}" ] || [ ! -d "$HOME" ] || [ ! -w "$HOME" ]; then
+  echo "HOME (${HOME:-unset}) is missing or not writable, so ~/.local cannot be created." >&2
+  exit 2
+fi
 PREFIX=${PREFIX:-"$HOME/.local/opt/frameplayer"}
 BIN_DIR=${BIN_DIR:-"$HOME/.local/bin"}
 APP_ID=app.frameplayer.Player
@@ -63,7 +67,8 @@ if command -v update-desktop-database >/dev/null 2>&1; then
 fi
 
 echo
-echo "Installed Frame Player."
+echo "Installed Frame Player under your home directory, not inside the git checkout."
+echo "  Files:      $HOME/.local"
 echo "  Play:       $BIN_DIR/frameplayer"
 echo "  Uninstall:  $BIN_DIR/frameplayer-uninstall"
 case ":$PATH:" in
