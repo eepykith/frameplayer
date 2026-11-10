@@ -1,5 +1,17 @@
 # Frame Player
 
+Paste this into Konsole:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/eepykith/frameplayer/main/install.sh | sh
+```
+
+That downloads Frame Player and installs it in `/home/steamos/frameplayer`. When it finishes, start it with:
+
+```sh
+/home/steamos/frameplayer/frameplayer
+```
+
 Frame Player plays website streams and direct video on [Steam Frame](https://partner.steamgames.com/doc/steamhardware/steamframe): YouTube, Twitch, anything else [yt-dlp](https://github.com/yt-dlp/yt-dlp) supports, plus HLS, DASH, and MP4 URLs. It is built for the headset's Snapdragon 8 Gen 3, keeps a short history and a favorites list, and shows which decoder is actually running.
 
 The window is a normal Linux app. On Steam Frame it runs in desktop mode (a flat panel in the headset) and can be added to Steam as a non-Steam game. Controls are large enough for the controller's laser pointer, and a gamepad template drives play, seek, volume, and 360° look.
@@ -52,31 +64,9 @@ The desktop window is one flat panel, so both of your eyes see the same image. F
 
 ## Install
 
-From this repository:
+The command at the top of this page is the whole install. It downloads this repository and installs into `/home/steamos/frameplayer`. The first run downloads a Flatpak runtime, so it takes a while.
 
-```sh
-sh install.sh
-```
-
-On SteamOS that installs into `/home/steamos/frameplayer` and builds a Flatpak for that user. The first run downloads a runtime, so it takes a while. Then:
-
-```sh
-/home/steamos/frameplayer/frameplayer
-```
-
-`flatpak run` before `sh install.sh` finishes says the app is not installed. That is expected.
-
-On a PC that has no `/home/steamos` directory and no `flatpak` command, the same command installs into `~/frameplayer`.
-
-YouTube playback needs Deno, or Node 22 or newer, on `PATH`.
-
-Remove the app with:
-
-```sh
-sh uninstall.sh
-```
-
-`sh uninstall.sh --purge` also deletes favorites and settings. A Steam non-Steam shortcut is removed in the Steam library.
+Remove it with `/home/steamos/frameplayer/uninstall`. Adding `--purge` also deletes favorites and settings.
 
 ## Add it to Steam
 

@@ -1,12 +1,34 @@
 #!/bin/sh
-# One install command, from the repository root:
-#   sh install.sh
+# Paste this into Konsole on Steam Frame:
+#   curl -fsSL https://raw.githubusercontent.com/eepykith/frameplayer/main/install.sh | sh
 #
-# SteamOS / Steam Frame: files go in /home/steamos/frameplayer, and the Flatpak
-# is installed for that user. A PC without that home directory uses $HOME.
+# Files land in /home/steamos/frameplayer. A PC without that home uses $HOME.
 set -eu
 
-cd "$(dirname "$0")"
+script_dir=$(CDPATH= cd -- "$(dirname "$0")" 2>/dev/null && pwd || true)
+if [ ! -f "${script_dir}/packaging/flatpak/app.frameplayer.Player.yml" ]; then
+  echo "Downloading Frame Player..."
+  if [ -d /home/steamos ] && [ -w /home/steamos ]; then
+    src=/home/steamos/frameplayer-src
+  else
+    src=${HOME:-/tmp}/frameplayer-src
+  fi
+  mkdir -p "$src"
+  archive=$(mktemp)
+  if command -v curl >/dev/null 2>&1; then
+    curl -fsSL -o "$archive" https://github.com/eepykith/frameplayer/archive/refs/heads/main.tar.gz
+  elif command -v wget >/dev/null 2>&1; then
+    wget -q -O "$archive" https://github.com/eepykith/frameplayer/archive/refs/heads/main.tar.gz
+  else
+    echo "Install curl or wget, then run this again." >&2
+    exit 1
+  fi
+  tar -xzf "$archive" -C "$src" --strip-components=1
+  rm -f "$archive"
+  exec sh "$src/install.sh"
+fi
+
+cd "$script_dir"
 root=$(pwd)
 
 if [ -d /home/steamos ] && [ -w /home/steamos ]; then
