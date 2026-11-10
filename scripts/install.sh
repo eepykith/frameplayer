@@ -25,8 +25,9 @@ case "$PREFIX" in
     ;;
 esac
 
-# python3 -m venv does not create missing parents. A fresh account often has no ~/.local.
-mkdir -p "$(dirname "$PREFIX")" "$BIN_DIR" \
+# ~/.local often exists while ~/.local/opt does not. venv will not create that parent.
+echo "Creating $HOME/.local/opt"
+mkdir -p "$HOME/.local/opt" "$(dirname "$PREFIX")" "$BIN_DIR" \
   "$HOME/.local/share/applications" \
   "$HOME/.local/share/icons/hicolor/scalable/apps"
 

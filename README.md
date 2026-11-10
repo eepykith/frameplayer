@@ -56,7 +56,7 @@ YouTube needs a JavaScript runtime. Deno is preferred. Node 22 or newer also wor
 
 ### For your user
 
-This installs Frame Player into `~/.local/opt/frameplayer`, adds a desktop entry, and puts `frameplayer` and `frameplayer-uninstall` on `~/.local/bin`. The script creates `~/.local` when that directory is not there yet.
+This installs Frame Player into `~/.local/opt/frameplayer`, adds a desktop entry, and puts `frameplayer` and `frameplayer-uninstall` on `~/.local/bin`. The script creates `~/.local/opt` when `~/.local` exists but `opt` does not.
 
 ```sh
 ./scripts/install.sh
