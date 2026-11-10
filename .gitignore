@@ -1,0 +1,12 @@
+.venv/
+agent-tools/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+build-dir/
+.flatpak-builder/
+samples/*.mp4
+*.mp4
+.pytest_cache/

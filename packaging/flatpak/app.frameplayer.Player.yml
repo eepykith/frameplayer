@@ -1,0 +1,60 @@
+id: app.frameplayer.Player
+runtime: org.freedesktop.Platform
+runtime-version: "26.08"
+sdk: org.freedesktop.Sdk
+command: frameplayer
+finish-args:
+  - --share=ipc
+  - --share=network
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --socket=pulseaudio
+  - --socket=pipewire
+  # Iris is a V4L2 decoder node (/dev/video-dec0). dri alone does not expose it,
+  # and Steam Input shows up as /dev/input/js*. device=all covers both.
+  - --device=dri
+  - --device=all
+  - --talk-name=org.freedesktop.Notifications
+build-options:
+  build-args:
+    - --share=network
+modules:
+  - name: deno
+    buildsystem: simple
+    build-commands:
+      - install -Dm755 deno ${FLATPAK_DEST}/bin/deno
+    sources:
+      - type: archive
+        only-arches: [x86_64]
+        url: https://github.com/denoland/deno/releases/download/v2.9.8/deno-x86_64-unknown-linux-gnu.zip
+        sha256: e890975bc2549807bbcc0b584ffafda72cc7c93349dd99c80483dd784f6c4609
+        dest: .
+      - type: archive
+        only-arches: [aarch64]
+        url: https://github.com/denoland/deno/releases/download/v2.9.8/deno-aarch64-unknown-linux-gnu.zip
+        sha256: d49596c20b9788cf8f5d8ddf644103d4bde56ed239753f0bdb92ba9361d51905
+        dest: .
+
+  - name: mpv
+    buildsystem: meson
+    config-opts:
+      - -Dlibmpv=true
+      - -Dcplayer=true
+      - -Dbuild-date=false
+    sources:
+      - type: git
+        url: https://github.com/mpv-player/mpv.git
+        tag: v0.42.0
+        commit: b0841e8c4d156b8403dc1876c4cbd9011eb583f3
+
+  - name: frameplayer
+    buildsystem: simple
+    build-commands:
+      - pip3 install --prefix=${FLATPAK_DEST} "PySide6>=6.6" "python-mpv>=1.0.7" "yt-dlp[default]>=2025.11.12"
+      - pip3 install --prefix=${FLATPAK_DEST} --no-deps --no-build-isolation .
+      - install -Dm644 packaging/app.frameplayer.Player.desktop ${FLATPAK_DEST}/share/applications/app.frameplayer.Player.desktop
+      - install -Dm644 packaging/app.frameplayer.Player.metainfo.xml ${FLATPAK_DEST}/share/metainfo/app.frameplayer.Player.metainfo.xml
+      - install -Dm644 frameplayer/assets/frameplayer.svg ${FLATPAK_DEST}/share/icons/hicolor/scalable/apps/app.frameplayer.Player.svg
+    sources:
+      - type: dir
+        path: ../..

@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Frame Player
+GenericName=Video Player
+Comment=Play 8K, 3D, and VR streams with hardware decoding on Steam Frame
+Exec=frameplayer %u
+Icon=app.frameplayer.Player
+Terminal=false
+Type=Application
+Categories=AudioVideo;Video;Player;
+Keywords=video;vr;8k;youtube;hls;twitch;steam;
+StartupWMClass=frameplayer

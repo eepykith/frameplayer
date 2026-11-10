@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "frameplayer"
+version = "0.1.0"
+description = "Hardware-accelerated 8K, 3D, and VR video player for Steam Frame"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "GPL-2.0-or-later" }
+dependencies = [
+  "PySide6>=6.6",
+  "python-mpv>=1.0.7",
+  "yt-dlp[default]>=2025.11.12",
+]
+
+[project.scripts]
+frameplayer = "frameplayer.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["frameplayer*"]
+
+[tool.setuptools.package-data]
+frameplayer = ["assets/*"]

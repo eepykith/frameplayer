@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>app.frameplayer.Player</id>
+  <name>Frame Player</name>
+  <summary>Hardware-accelerated 8K, 3D, and VR video for Steam Frame</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-2.0-or-later</project_license>
+  <description>
+    <p>
+      Frame Player opens YouTube, Twitch, HLS, DASH, and direct video URLs on
+      Steam Frame. It decodes with Qualcomm Iris when the stream is H.264, HEVC,
+      or VP9 up to 8192 pixels, and falls back to the CPU otherwise.
+    </p>
+    <p>
+      Side-by-side and over-under 3D, plus 360° and 180° VR, are shown in the
+      desktop window with eye selection and look-around controls that work with
+      a pointer or a gamepad.
+    </p>
+  </description>
+  <launchable type="desktop-id">app.frameplayer.Player.desktop</launchable>
+  <content_rating type="oars-1.1"/>
+  <releases>
+    <release version="0.1.0" date="2026-11-10"/>
+  </releases>
+</component>
