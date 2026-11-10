@@ -65,13 +65,17 @@ frameplayer
 
 ### Flatpak (preferred on SteamOS)
 
-SteamOS does not let you write the root filesystem. Flatpak installs into your user. The build script also installs `frameplayer-uninstall` into `~/.local/bin`.
+SteamOS does not let you write the root filesystem. Flatpak installs into your user. The build script installs the aarch64 runtime on Steam Frame (or x86_64 on a PC), builds the app, and only then is `flatpak run` valid. It also installs `frameplayer-uninstall` into `~/.local/bin`.
+
+`cd` into the checkout first. The directory that contains `scripts/` is the right place. `./scripts/build-flatpak.sh` can fail in `ash` with "No such file or directory" when `/bin/sh` is not the interpreter, so call `sh` yourself:
 
 ```sh
-flatpak install -y flathub org.freedesktop.Platform//26.08 org.freedesktop.Sdk//26.08
-./scripts/build-flatpak.sh
+cd /path/to/frameplayer
+sh scripts/build-flatpak.sh
 flatpak run app.frameplayer.Player
 ```
+
+`flatpak run` before that build finishes exits with `app/app.frameplayer.Player/aarch64/master not installed`. That means the Flatpak is not on the headset yet, not that the arch is wrong.
 
 The manifest builds mpv 0.42 with libmpv, installs Deno 2.9.8 (YouTube), and installs the Python app. It is not pinned to one CPU architecture: build it on the Frame for aarch64, or on a PC for x86_64. The sandbox asks for `--device=all` because the Iris node is `/dev/video-dec0` and Steam Input is `/dev/input/js*`. `--device=dri` alone does not expose either.
 
