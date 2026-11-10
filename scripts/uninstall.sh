@@ -10,7 +10,11 @@
 set -eu
 
 APP_ID=app.frameplayer.Player
-PREFIX=${PREFIX:-"$HOME/.local/opt/frameplayer"}
+if [ -d /home/steamos ] && [ -w /home/steamos ]; then
+  HOME=/home/steamos
+  export HOME
+fi
+PREFIX=${PREFIX:-"$HOME/frameplayer"}
 BIN_DIR=${BIN_DIR:-"$HOME/.local/bin"}
 PURGE=0
 DRY=0
@@ -68,6 +72,13 @@ fi
 
 if [ -d "$PREFIX" ]; then
   run rm -rf "$PREFIX"
+fi
+# Older installs lived here.
+if [ -d "$HOME/.local/opt/frameplayer" ]; then
+  run rm -rf "$HOME/.local/opt/frameplayer"
+fi
+if [ -d "$HOME/frameplayer-build" ]; then
+  run rm -rf "$HOME/frameplayer-build"
 fi
 
 if command -v flatpak >/dev/null 2>&1; then

@@ -58,15 +58,15 @@ From this repository:
 sh install.sh
 ```
 
-On SteamOS that builds a Flatpak. The first run downloads a runtime, so it takes a while. Then:
+On SteamOS that installs into `/home/steamos/frameplayer` and builds a Flatpak for that user. The first run downloads a runtime, so it takes a while. Then:
 
 ```sh
-flatpak run app.frameplayer.Player
+/home/steamos/frameplayer/frameplayer
 ```
 
 `flatpak run` before `sh install.sh` finishes says the app is not installed. That is expected.
 
-On a PC that has no `flatpak` command, the same `sh install.sh` creates `~/.local/opt` and installs there. Start it with `~/.local/bin/frameplayer`.
+On a PC that has no `/home/steamos` directory and no `flatpak` command, the same command installs into `~/frameplayer`.
 
 YouTube playback needs Deno, or Node 22 or newer, on `PATH`.
 
@@ -82,7 +82,7 @@ sh uninstall.sh
 
 1. Run `sh install.sh`.
 2. In Steam: **Games → Add a Non-Steam Game to My Library → Browse**.
-3. Pick `~/.local/share/flatpak/exports/bin/app.frameplayer.Player`, or `~/.local/bin/frameplayer` if you installed without Flatpak.
+3. Pick `/home/steamos/frameplayer/frameplayer`.
 4. In **Properties**, name it Frame Player. Enable Steam Input and use a gamepad template.
 5. Launch it from the library. On Steam Frame it opens as a flat window in the dashboard, the same way other desktop apps do. From Desktop mode, the controller aims a laser at the buttons; face buttons and sticks still work as below.
 
