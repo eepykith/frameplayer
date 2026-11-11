@@ -1,7 +1,16 @@
 import unittest
 
 from frameplayer.hwdec import device_from_identity, select_hwdec_plan
-from frameplayer.resolve import ResolveError, classify_url, drm_service, order_items, parse_m3u8, without_software_av1
+from frameplayer.resolve import (
+    ResolveError,
+    classify_url,
+    drm_service,
+    hits_from_search,
+    order_items,
+    parse_m3u8,
+    search_query,
+    without_software_av1,
+)
 
 MASTER = """
 #EXTM3U
@@ -57,6 +66,24 @@ class ResolveTests(unittest.TestCase):
         with self.assertRaises(ResolveError) as caught:
             without_software_av1(only_av1, plan)
         self.assertIn("will not decode it on the CPU", str(caught.exception))
+
+    def test_search_query_and_results(self):
+        self.assertEqual(search_query("youtube", "  steam   frame  ", 8), "ytsearch8:steam frame")
+        self.assertEqual(search_query("soundcloud", "quartet"), "scsearch12:quartet")
+        with self.assertRaises(ResolveError):
+            search_query("youtube", "   ")
+        hits = hits_from_search(
+            {
+                "entries": [
+                    {"id": "abc123", "title": "Headset tour", "uploader": "Valve", "duration": 75},
+                    {"webpage_url": "https://soundcloud.com/x/y", "title": "Live", "artist": "Band"},
+                ]
+            },
+            "youtube",
+        )
+        self.assertEqual(hits[0].url, "https://www.youtube.com/watch?v=abc123")
+        self.assertIn("1:15", hits[0].label())
+        self.assertEqual(hits[1].url, "https://soundcloud.com/x/y")
 
     def test_media_playlist_is_one_item(self):
         text = "#EXTM3U\n#EXTINF:4,\nseg.ts\n"

@@ -1,5 +1,7 @@
 # Frame Player
 
+Search YouTube or SoundCloud in the player, then tap a result. The stream still plays through the hardware decoder.
+
 Paste this into Konsole:
 
 ```sh
@@ -68,7 +70,7 @@ The desktop window is one flat panel, so both of your eyes see the same image. F
 
 ## Install
 
-The command at the top of this page is the whole install. On Steam Frame it downloads the prebuilt aarch64 Flatpak from the v0.1.4 release and installs it into `/home/steamos/frameplayer`. Flathub supplies the runtime. The headset does not compile the player.
+The command at the top of this page is the whole install. On Steam Frame it downloads the prebuilt aarch64 Flatpak from the v0.1.5 release and installs it into `/home/steamos/frameplayer`. Flathub supplies the runtime. The headset does not compile the player. Search YouTube or SoundCloud from the bar under the address field, then tap a result to play it.
 
 Remove it with `/home/steamos/frameplayer/uninstall`. Adding `--purge` also deletes favorites and settings.
 

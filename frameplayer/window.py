@@ -128,6 +128,28 @@ Controller (Steam Input gamepad)
 """
 
 
+class SearchWorker(QThread):
+    succeeded = Signal(object)
+    failed = Signal(str)
+
+    def __init__(self, query: str, site: str) -> None:
+        super().__init__()
+        self._query = query
+        self._site = site
+
+    def run(self) -> None:
+        from frameplayer.resolve import ResolveError, search_videos
+
+        try:
+            hits = search_videos(self._query, self._site)
+        except ResolveError as exc:
+            self.failed.emit(str(exc))
+        except Exception as exc:
+            self.failed.emit(str(exc) or exc.__class__.__name__)
+        else:
+            self.succeeded.emit(hits)
+
+
 class ResolveWorker(QThread):
     succeeded = Signal(object)
     failed = Signal(str, bool)
@@ -270,6 +292,20 @@ class MainWindow(QMainWindow):
         url_row.addWidget(self.paste_button)
         outer.addLayout(url_row)
 
+        search_row = QHBoxLayout()
+        self.site = QComboBox()
+        self.site.addItem("YouTube", "youtube")
+        self.site.addItem("SoundCloud", "soundcloud")
+        self.site.setMinimumWidth(160)
+        self.search_edit = QLineEdit()
+        self.search_edit.setPlaceholderText("Search the site for a video")
+        self.search_edit.returnPressed.connect(self._search)
+        self.search_button = self._button("Search", self._search)
+        search_row.addWidget(self.site)
+        search_row.addWidget(self.search_edit, 1)
+        search_row.addWidget(self.search_button)
+        outer.addLayout(search_row)
+
         samples = QHBoxLayout()
         samples.addWidget(self._button("Sample HLS", lambda: self.play_url(SAMPLE_HLS)))
         samples.addWidget(self._button("Sample YouTube", lambda: self.play_url(SAMPLE_YOUTUBE)))
@@ -394,6 +430,10 @@ class MainWindow(QMainWindow):
         panel.setObjectName("panel")
         panel.setFixedWidth(300)
         layout = QVBoxLayout(panel)
+        layout.addWidget(QLabel("Search results"))
+        self.results = QListWidget()
+        self.results.itemClicked.connect(self._open_entry)
+        layout.addWidget(self.results, 2)
         layout.addWidget(QLabel("Favorites"))
         self.favorites = QListWidget()
         self.favorites.itemClicked.connect(self._open_entry)
@@ -825,6 +865,42 @@ class MainWindow(QMainWindow):
     def _play_from_box(self) -> None:
         self.play_url(self.url_edit.text().strip())
 
+    def _search(self) -> None:
+        query = self.search_edit.text().strip()
+        site = str(self.site.currentData() or "youtube")
+        if not query:
+            self.status.setText("Type a title, channel, or topic to search.")
+            self.search_edit.setFocus()
+            return
+        self._search_token = getattr(self, "_search_token", 0) + 1
+        token = self._search_token
+        label = self.site.currentText()
+        self.status.setText(f"Searching {label}…")
+        self.library_panel.setVisible(True)
+        worker = SearchWorker(query, site)
+        worker.succeeded.connect(lambda hits, token=token: self._on_search(token, hits))
+        worker.failed.connect(lambda message, token=token: self._on_search_failed(token, message))
+        self._search_worker = worker
+        worker.start()
+
+    def _on_search(self, token: int, hits) -> None:
+        if token != getattr(self, "_search_token", 0):
+            return
+        self.results.clear()
+        for hit in hits:
+            item = QListWidgetItem(hit.label())
+            item.setData(Qt.ItemDataRole.UserRole, hit.url)
+            item.setToolTip(hit.url)
+            item.setSizeHint(QSize(260, 72))
+            self.results.addItem(item)
+        self.status.setText(f"{len(hits)} videos. Tap one to play it.")
+
+    def _on_search_failed(self, token: int, message: str) -> None:
+        if token != getattr(self, "_search_token", 0):
+            return
+        self._set_error(message)
+        self.status.setText("Search did not return any videos.")
+
     def _paste_and_play(self) -> None:
         from PySide6.QtWidgets import QApplication
 
@@ -905,6 +981,9 @@ class MainWindow(QMainWindow):
         widgets: list[QWidget] = [
             self.url_edit,
             self.paste_button,
+            self.site,
+            self.search_edit,
+            self.search_button,
             *self._chips,
             self.eye,
             self.projection,

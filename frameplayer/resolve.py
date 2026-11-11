@@ -475,6 +475,100 @@ def items_from_info(info: dict, plan: HwdecPlan, *, page_url: str) -> tuple[list
     return list(best.values()), message or title
 
 
+SEARCH_SITES = (
+    ("youtube", "YouTube", "ytsearch"),
+    ("soundcloud", "SoundCloud", "scsearch"),
+)
+
+
+@dataclass(frozen=True)
+class SearchHit:
+    title: str
+    url: str
+    uploader: str
+    duration: float | None
+    site: str
+
+    def label(self) -> str:
+        who = self.uploader or self.site
+        if self.duration:
+            total = int(self.duration)
+            minutes, seconds = divmod(total, 60)
+            clock = f"{minutes}:{seconds:02d}"
+            return f"{self.title}\n{who} · {clock}"
+        return f"{self.title}\n{who}"
+
+
+def search_query(site: str, text: str, limit: int = 12) -> str:
+    query = " ".join((text or "").split())
+    if not query:
+        raise ResolveError("Type a title, channel, or topic to search.")
+    prefixes = {key: prefix for key, _label, prefix in SEARCH_SITES}
+    if site not in prefixes:
+        raise ResolveError("Choose YouTube or SoundCloud.")
+    count = max(1, min(int(limit), 25))
+    return f"{prefixes[site]}{count}:{query}"
+
+
+def hits_from_search(info: dict, site: str) -> list[SearchHit]:
+    entries = info.get("entries") if isinstance(info, dict) else None
+    if entries is None and isinstance(info, dict) and (info.get("webpage_url") or info.get("id")):
+        entries = [info]
+    hits: list[SearchHit] = []
+    for entry in entries or []:
+        if not isinstance(entry, dict):
+            continue
+        url = str(entry.get("webpage_url") or "")
+        video_id = str(entry.get("id") or entry.get("url") or "")
+        if not url.startswith("http"):
+            if video_id.startswith("http"):
+                url = video_id
+            elif site == "youtube" and video_id:
+                url = f"https://www.youtube.com/watch?v={video_id}"
+            elif site == "soundcloud" and video_id.startswith("http"):
+                url = video_id
+        if not url.startswith("http"):
+            continue
+        hits.append(
+            SearchHit(
+                title=str(entry.get("title") or url),
+                url=url,
+                uploader=str(entry.get("uploader") or entry.get("channel") or entry.get("artist") or ""),
+                duration=_float(entry.get("duration")),
+                site=site,
+            )
+        )
+    return hits
+
+
+def search_videos(query: str, site: str = "youtube", limit: int = 12) -> list[SearchHit]:
+    spec = search_query(site, query, limit)
+    try:
+        import yt_dlp
+    except ImportError as exc:
+        raise ResolveError("yt-dlp is not installed, so site search is unavailable.") from exc
+    options = {
+        "quiet": True,
+        "no_warnings": True,
+        "skip_download": True,
+        "extract_flat": "in_playlist",
+        "js_runtimes": _js_runtimes(),
+        "socket_timeout": 30,
+        "retries": 2,
+    }
+    try:
+        with yt_dlp.YoutubeDL(options) as ydl:
+            info = ydl.extract_info(spec, download=False)
+    except Exception as exc:
+        raise ResolveError(str(exc) or "Search failed.") from exc
+    if not isinstance(info, dict):
+        raise ResolveError("Search returned nothing.")
+    hits = hits_from_search(info, site)
+    if not hits:
+        raise ResolveError("No videos matched that search.")
+    return hits
+
+
 def extract_with_ytdlp(url: str) -> dict:
     try:
         import yt_dlp
