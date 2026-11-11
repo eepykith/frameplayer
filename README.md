@@ -12,6 +12,10 @@ On Steam Frame that downloads a prebuilt ARM64 package. It does not compile anyt
 /home/steamos/frameplayer/frameplayer
 ```
 
+![Frame Player ready for a link](docs/ui-home.png)
+
+![Playback with decoder stats](docs/ui-playback.png)
+
 Frame Player plays website streams and direct video on [Steam Frame](https://partner.steamgames.com/doc/steamhardware/steamframe): YouTube, Twitch, anything else [yt-dlp](https://github.com/yt-dlp/yt-dlp) supports, plus HLS, DASH, and MP4 URLs. It is built for the headset's Snapdragon 8 Gen 3, keeps a short history and a favorites list, and shows which decoder is actually running.
 
 The window is a normal Linux app. On Steam Frame it runs in desktop mode (a flat panel in the headset) and can be added to Steam as a non-Steam game. Controls are large enough for the controller's laser pointer, and a gamepad template drives play, seek, volume, and 360° look.
