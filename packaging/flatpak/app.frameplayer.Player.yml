@@ -9,7 +9,6 @@ finish-args:
   - --socket=wayland
   - --socket=fallback-x11
   - --socket=pulseaudio
-  - --socket=pipewire
   # Iris is a V4L2 decoder node (/dev/video-dec0). dri alone does not expose it,
   # and Steam Input shows up as /dev/input/js*. device=all covers both.
   - --device=dri
