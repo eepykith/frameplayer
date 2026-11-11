@@ -1,7 +1,7 @@
 import unittest
 
 from frameplayer.hwdec import device_from_identity, select_hwdec_plan
-from frameplayer.resolve import classify_url, drm_service, order_items, parse_m3u8
+from frameplayer.resolve import ResolveError, classify_url, drm_service, order_items, parse_m3u8, without_software_av1
 
 MASTER = """
 #EXTM3U
@@ -46,6 +46,17 @@ class ResolveTests(unittest.TestCase):
         self.assertFalse(wide.hw)
         capped = order_items(items, ceiling=1080, prefer_hw=True)
         self.assertEqual(capped[0].height, 1080)
+
+    def test_av1_is_dropped_until_hardware_exists(self):
+        plan = iris_plan()
+        items = parse_m3u8(MASTER, "https://cdn.example/master.m3u8", title="8K", plan=plan, headers={})
+        kept = without_software_av1(items, plan)
+        self.assertTrue(kept)
+        self.assertFalse(any(item.vcodec.startswith("av01") for item in kept))
+        only_av1 = [item for item in items if item.vcodec.startswith("av01")]
+        with self.assertRaises(ResolveError) as caught:
+            without_software_av1(only_av1, plan)
+        self.assertIn("will not decode it on the CPU", str(caught.exception))
 
     def test_media_playlist_is_one_item(self):
         text = "#EXTM3U\n#EXTINF:4,\nseg.ts\n"

@@ -9,7 +9,15 @@ import urllib.request
 from dataclasses import dataclass, field
 from urllib.parse import urljoin, urlparse
 
-from frameplayer.hwdec import HwdecPlan, codec_family, codec_is_hardware, exceeds_iris, resolution_tier
+from frameplayer.hwdec import (
+    AV1_WAIT_MESSAGE,
+    HwdecPlan,
+    codec_family,
+    codec_is_hardware,
+    exceeds_iris,
+    resolution_tier,
+    software_av1_blocked,
+)
 from frameplayer.presentation import Presentation, detect_presentation
 
 USER_AGENT = (
@@ -160,6 +168,19 @@ def rank_key(item: PlayItem, ceiling: int, prefer_hw: bool) -> tuple:
 
 def order_items(items: list[PlayItem], ceiling: int, prefer_hw: bool) -> list[PlayItem]:
     return sorted(items, key=lambda item: rank_key(item, ceiling, prefer_hw), reverse=True)
+
+
+def without_software_av1(items: list[PlayItem], plan: HwdecPlan) -> list[PlayItem]:
+    """Drop AV1 renditions when the only decoder for them would be the CPU.
+
+    If every rendition is AV1, raise instead of returning an empty list.
+    """
+    if not software_av1_blocked(plan):
+        return items
+    kept = [item for item in items if codec_family(item.vcodec) != "av1"]
+    if items and not kept:
+        raise ResolveError(AV1_WAIT_MESSAGE)
+    return kept
 
 
 def _make_item(
@@ -631,7 +652,8 @@ def resolve(url: str, plan: HwdecPlan, *, ceiling: int = 4320, prefer_hw: bool =
             width=max((item.width for item in items), default=0),
             height=max((item.height for item in items), default=0),
         )
-    ordered = order_items(items, ceiling, prefer_hw)
+    kept = without_software_av1(items, plan)
+    ordered = order_items(kept, ceiling, prefer_hw)
     if not ordered:
         raise ResolveError("No playable video format was found.")
     # Cap the on-screen list. The selected item is always kept.

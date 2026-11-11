@@ -30,7 +30,7 @@ from PySide6.QtWidgets import (
 
 from frameplayer.gamepad import GamepadReader, actions_for
 from frameplayer.glvideo import VideoWidget
-from frameplayer.hwdec import HwdecPlan, resolution_tier
+from frameplayer.hwdec import AV1_WAIT_MESSAGE, HwdecPlan, codec_family, resolution_tier, software_av1_blocked
 from frameplayer.library import Library
 from frameplayer.presentation import Presentation, layout_label, projection_label, resolve_presentation
 from frameplayer.resolve import SAMPLE_HLS, SAMPLE_YOUTUBE, PlayItem, ResolveError, Resolved, resolve
@@ -632,6 +632,15 @@ class MainWindow(QMainWindow):
                 return
             self._set_error(self.playback.last_error_line())
         stats = self.playback.snapshot()
+        if software_av1_blocked(self.plan) and codec_family(stats.codec) == "av1":
+            try:
+                self.player.command("stop")
+            except Exception:
+                pass
+            self._playing = False
+            self._set_error(AV1_WAIT_MESSAGE)
+            self.status.setText(AV1_WAIT_MESSAGE)
+            return
         if self._playing and stats.decoded_width > 0 and self._applied_token != id(self.current):
             self.video.set_frame_size(stats.decoded_width, stats.decoded_height)
             presentation = self._effective()

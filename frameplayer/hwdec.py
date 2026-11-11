@@ -290,6 +290,18 @@ def select_hwdec_plan(
     )
 
 
+AV1_WAIT_MESSAGE = (
+    "This video is AV1. Steam Frame cannot hardware-decode AV1 yet, "
+    "so Frame Player will not decode it on the CPU. "
+    "It will play when the Iris driver advertises AV1."
+)
+
+
+def software_av1_blocked(plan: HwdecPlan) -> bool:
+    """True when this machine would decode AV1 on the CPU and we refuse to do that."""
+    return plan.platform in {"steam-frame", "qualcomm-v4l2"} and "av1" not in plan.hw_codecs
+
+
 def codec_is_hardware(codec: str | None, width: int | None, height: int | None, plan: HwdecPlan) -> bool:
     if not plan.chain or plan.mpv_hwdec in {"", "no"} or not plan.hw_codecs:
         return False

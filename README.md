@@ -64,7 +64,7 @@ The desktop window is one flat panel, so both of your eyes see the same image. F
 
 ## Install
 
-The command at the top of this page is the whole install. On Steam Frame it downloads the prebuilt aarch64 Flatpak from the v0.1.1 release and installs it into `/home/steamos/frameplayer`. Flathub supplies the runtime. The headset does not compile the player.
+The command at the top of this page is the whole install. On Steam Frame it downloads the prebuilt aarch64 Flatpak from the v0.1.2 release and installs it into `/home/steamos/frameplayer`. Flathub supplies the runtime. The headset does not compile the player.
 
 Remove it with `/home/steamos/frameplayer/uninstall`. Adding `--purge` also deletes favorites and settings.
 
@@ -119,7 +119,7 @@ flatpak run --command=frameplayer app.frameplayer.Player --probe
 ## Limitations
 
 - DRM catalogs do not work. Netflix, Disney+, Prime Video, Max, Hulu, Apple TV, Paramount+, and Peacock use Widevine. yt-dlp cannot produce a clear stream, and Frame Player refuses those hosts up front.
-- AV1 is software decode on current Steam Frame kernels.
+- AV1 is not played on Steam Frame while the Iris driver omits it. Frame Player waits for hardware decode instead of using the CPU.
 - Frames larger than 8192 pixels on a side exceed Iris and fall back to software. Some "12K" VR masters are in that bucket.
 - 8K is decoded as one frame, then copied into the window. 8K60 can stutter even when Iris is keeping up.
 - The window cannot show a different image to each eye. 3D is one eye at a time, or the packed frame.
