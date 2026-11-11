@@ -28,9 +28,9 @@ jobs:
         run: |
           flatpak-builder --disable-rofiles-fuse --force-clean --repo=repo \
             build-dir packaging/flatpak/app.frameplayer.Player.yml
-          flatpak build-bundle \
-            --runtime-repo=https://dl.flathub.org/repo/ \
-            repo frameplayer-aarch64.flatpak app.frameplayer.Player
+          # Do not set --runtime-repo. Flathub answers 403 for the bare
+          # https://dl.flathub.org/repo/ URL, and Flatpak then refuses to install.
+          flatpak build-bundle repo frameplayer-aarch64.flatpak app.frameplayer.Player
 
       - name: Publish release asset
         env:
@@ -40,7 +40,7 @@ jobs:
           if [ "$tag" = "main" ] || [ "$tag" = "master" ]; then
             tag=v0.1.0
           fi
-          notes="Prebuilt aarch64 Flatpak for SteamOS on Steam Frame. It does not compile on the headset. The Freedesktop 26.08 runtime is downloaded from Flathub during install."
+          notes="Prebuilt aarch64 Flatpak for SteamOS on Steam Frame. It does not compile on the headset. Install the Freedesktop 26.08 runtime from the Flathub remote first; this bundle does not point at the bare dl.flathub.org/repo URL."
           if gh release view "$tag" >/dev/null 2>&1; then
             gh release upload "$tag" frameplayer-aarch64.flatpak --clobber
           else

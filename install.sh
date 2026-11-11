@@ -23,7 +23,7 @@ if [ "$arch" = "aarch64" ] || [ "$arch" = "arm64" ]; then
   mkdir -p "$prefix"
   echo "Downloading the prebuilt Steam Frame package (aarch64). Nothing is compiled on this device."
   bundle="$prefix/frameplayer-aarch64.flatpak"
-  url="https://github.com/eepykith/frameplayer/releases/download/v0.1.5/frameplayer-aarch64.flatpak"
+  url="https://github.com/eepykith/frameplayer/releases/download/v0.1.6/frameplayer-aarch64.flatpak"
   if command -v curl >/dev/null 2>&1; then
     curl -fL --retry 3 -o "$bundle" "$url"
   elif command -v wget >/dev/null 2>&1; then
@@ -33,6 +33,8 @@ if [ "$arch" = "aarch64" ] || [ "$arch" = "arm64" ]; then
     exit 1
   fi
   flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+  echo "Installing the Freedesktop runtime from Flathub, then the player."
+  flatpak install -y --user flathub org.freedesktop.Platform//26.08
   flatpak install -y --user "$bundle"
   cat > "$prefix/frameplayer" << EOF
 #!/bin/sh
