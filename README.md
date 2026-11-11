@@ -6,7 +6,7 @@ Paste this into Konsole:
 curl -fsSL https://raw.githubusercontent.com/eepykith/frameplayer/main/install.sh | sh
 ```
 
-That downloads Frame Player and installs it in `/home/steamos/frameplayer`. When it finishes, start it with:
+On Steam Frame that downloads a prebuilt ARM64 package. It does not compile anything on the headset. Files go in `/home/steamos/frameplayer`. When it finishes, start it with:
 
 ```sh
 /home/steamos/frameplayer/frameplayer
@@ -64,7 +64,7 @@ The desktop window is one flat panel, so both of your eyes see the same image. F
 
 ## Install
 
-The command at the top of this page is the whole install. It downloads this repository and installs into `/home/steamos/frameplayer`. The first run downloads a Flatpak runtime, so it takes a while.
+The command at the top of this page is the whole install. On Steam Frame it downloads the prebuilt aarch64 Flatpak from the v0.1.0 release and installs it into `/home/steamos/frameplayer`. Flathub supplies the runtime. The headset does not compile the player.
 
 Remove it with `/home/steamos/frameplayer/uninstall`. Adding `--purge` also deletes favorites and settings.
 

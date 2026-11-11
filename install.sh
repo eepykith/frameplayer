@@ -5,6 +5,53 @@
 # Files land in /home/steamos/frameplayer. A PC without that home uses $HOME.
 set -eu
 
+arch=$(uname -m)
+if [ "$arch" = "aarch64" ] || [ "$arch" = "arm64" ]; then
+  if [ -d /home/steamos ] && [ -w /home/steamos ]; then
+    HOME=/home/steamos
+    export HOME
+  fi
+  if [ -z "${HOME:-}" ] || [ ! -d "$HOME" ] || [ ! -w "$HOME" ]; then
+    echo "HOME (${HOME:-unset}) is missing or not writable." >&2
+    exit 2
+  fi
+  if ! command -v flatpak >/dev/null 2>&1; then
+    echo "flatpak is not installed." >&2
+    exit 1
+  fi
+  prefix="$HOME/frameplayer"
+  mkdir -p "$prefix"
+  echo "Downloading the prebuilt Steam Frame package (aarch64). Nothing is compiled on this device."
+  bundle="$prefix/frameplayer-aarch64.flatpak"
+  url="https://github.com/eepykith/frameplayer/releases/download/v0.1.0/frameplayer-aarch64.flatpak"
+  if command -v curl >/dev/null 2>&1; then
+    curl -fL --retry 3 -o "$bundle" "$url"
+  elif command -v wget >/dev/null 2>&1; then
+    wget -O "$bundle" "$url"
+  else
+    echo "Install curl or wget, then run this again." >&2
+    exit 1
+  fi
+  flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+  flatpak install -y --user "$bundle"
+  cat > "$prefix/frameplayer" << EOF
+#!/bin/sh
+exec flatpak run app.frameplayer.Player "\$@"
+EOF
+  chmod 755 "$prefix/frameplayer"
+  if command -v curl >/dev/null 2>&1; then
+    curl -fsSL -o "$prefix/uninstall" https://raw.githubusercontent.com/eepykith/frameplayer/main/scripts/uninstall.sh
+  else
+    wget -q -O "$prefix/uninstall" https://raw.githubusercontent.com/eepykith/frameplayer/main/scripts/uninstall.sh
+  fi
+  chmod 755 "$prefix/uninstall"
+  echo
+  echo "Installed in $prefix"
+  echo "  Start:   $prefix/frameplayer"
+  echo "  Remove:  $prefix/uninstall"
+  exit 0
+fi
+
 script_dir=$(CDPATH= cd -- "$(dirname "$0")" 2>/dev/null && pwd || true)
 if [ ! -f "${script_dir}/packaging/flatpak/app.frameplayer.Player.yml" ]; then
   echo "Downloading Frame Player..."

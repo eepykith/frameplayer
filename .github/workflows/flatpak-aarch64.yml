@@ -1,0 +1,50 @@
+name: Prebuild Steam Frame package
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  aarch64:
+    name: aarch64 Flatpak
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Flatpak
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y flatpak flatpak-builder ca-certificates
+          sudo flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+          sudo flatpak install -y flathub org.freedesktop.Platform//26.08 org.freedesktop.Sdk//26.08
+
+      - name: Build
+        run: |
+          flatpak-builder --disable-rofiles-fuse --force-clean --repo=repo \
+            build-dir packaging/flatpak/app.frameplayer.Player.yml
+          flatpak build-bundle \
+            --runtime-repo=https://dl.flathub.org/repo/ \
+            repo frameplayer-aarch64.flatpak app.frameplayer.Player
+
+      - name: Publish release asset
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          if [ "$tag" = "main" ] || [ "$tag" = "master" ]; then
+            tag=v0.1.0
+          fi
+          notes="Prebuilt aarch64 Flatpak for SteamOS on Steam Frame. It does not compile on the headset. The Freedesktop 26.08 runtime is downloaded from Flathub during install."
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release upload "$tag" frameplayer-aarch64.flatpak --clobber
+          else
+            gh release create "$tag" frameplayer-aarch64.flatpak \
+              --title "Frame Player $tag" \
+              --notes "$notes"
+          fi
