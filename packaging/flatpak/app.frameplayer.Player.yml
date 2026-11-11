@@ -49,12 +49,22 @@ modules:
         tag: v7.387.0
         commit: 275f7dea27924cdd34ab2e6c20e448b6bc4fab65
 
+  - name: libass
+    buildsystem: autotools
+    sources:
+      - type: archive
+        url: https://github.com/libass/libass/releases/download/0.17.3/libass-0.17.3.tar.xz
+        sha256: eae425da50f0015c21f7b3a9c7262a910f0218af469e22e2931462fed3c50959
+
   - name: mpv
     buildsystem: meson
     config-opts:
       - -Dlibmpv=true
       - -Dcplayer=true
       - -Dbuild-date=false
+      - -Dwerror=false
+      - -Dlua=disabled
+      - -Djavascript=disabled
     sources:
       - type: git
         url: https://github.com/mpv-player/mpv.git

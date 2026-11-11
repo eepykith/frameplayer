@@ -23,7 +23,7 @@ if [ "$arch" = "aarch64" ] || [ "$arch" = "arm64" ]; then
   mkdir -p "$prefix"
   echo "Downloading the prebuilt Steam Frame package (aarch64). Nothing is compiled on this device."
   bundle="$prefix/frameplayer-aarch64.flatpak"
-  url="https://github.com/eepykith/frameplayer/releases/download/v0.1.2/frameplayer-aarch64.flatpak"
+  url="https://github.com/eepykith/frameplayer/releases/download/v0.1.3/frameplayer-aarch64.flatpak"
   if command -v curl >/dev/null 2>&1; then
     curl -fL --retry 3 -o "$bundle" "$url"
   elif command -v wget >/dev/null 2>&1; then
