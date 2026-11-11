@@ -64,7 +64,7 @@ The desktop window is one flat panel, so both of your eyes see the same image. F
 
 ## Install
 
-The command at the top of this page is the whole install. On Steam Frame it downloads the prebuilt aarch64 Flatpak from the v0.1.0 release and installs it into `/home/steamos/frameplayer`. Flathub supplies the runtime. The headset does not compile the player.
+The command at the top of this page is the whole install. On Steam Frame it downloads the prebuilt aarch64 Flatpak from the v0.1.1 release and installs it into `/home/steamos/frameplayer`. Flathub supplies the runtime. The headset does not compile the player.
 
 Remove it with `/home/steamos/frameplayer/uninstall`. Adding `--purge` also deletes favorites and settings.
 

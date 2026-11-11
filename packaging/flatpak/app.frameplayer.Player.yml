@@ -35,6 +35,20 @@ modules:
         sha256: d49596c20b9788cf8f5d8ddf644103d4bde56ed239753f0bdb92ba9361d51905
         dest: .
 
+  - name: libplacebo
+    buildsystem: meson
+    config-opts:
+      - -Dvulkan=enabled
+      - -Dshaderc=enabled
+      - -Ddemos=false
+      - -Dtests=false
+      - -Dbench=false
+    sources:
+      - type: git
+        url: https://github.com/haasn/libplacebo.git
+        tag: v7.387.0
+        commit: 275f7dea27924cdd34ab2e6c20e448b6bc4fab65
+
   - name: mpv
     buildsystem: meson
     config-opts:
